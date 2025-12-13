@@ -166,7 +166,7 @@
         // Otomatis set link website mengikuti domain hosting saat ini dengan www.
         const websiteLink = document.getElementById('website-link');
         const hostname = window.location.hostname; // Mendapatkan hostname (misalnya example.com)
-        websiteLink.href = 'https://www.' + hostname; // Set href ke https://www.example.com
+        websiteLink.href = 'https://' + hostname; // Set href ke https://example.com
         websiteLink.textContent = 'www.' + hostname; // Update teks link menjadi www.example.com
     </script>
 </body>
