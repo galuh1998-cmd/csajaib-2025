@@ -163,11 +163,12 @@
             });
         });
 
-        // Otomatis set link website mengikuti domain hosting saat ini
+        // Otomatis set link website mengikuti domain hosting saat ini dengan www.
         const websiteLink = document.getElementById('website-link');
-        const currentDomain = window.location.origin; // Mendapatkan domain saat ini (misalnya https://example.com)
-        websiteLink.href = currentDomain; // Set href ke domain hosting baru
-        websiteLink.textContent = window.location.hostname; // Update teks link agar sesuai domain (misalnya example.com)
+        const hostname = window.location.hostname; // Mendapatkan hostname (misalnya example.com)
+        websiteLink.href = 'https://www.' + hostname; // Set href ke https://www.example.com
+        websiteLink.textContent = 'www.' + hostname; // Update teks link menjadi www.example.com
     </script>
 </body>
 </html>
+
