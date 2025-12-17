@@ -1,125 +1,149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>𝐒𝐄𝐓𝐓𝐈𝐍𝐆 𝐁𝐘 𝐋𝐔𝐇𝐇𝐎𝐒𝐓</title>
-
-    <!-- Bootstrap CSS (diambil dari index web Ajaib) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Custom CSS (diadaptasi dari index web Ajaib) -->
+    <title>Pencatat Keuangan</title>
     <style>
         body {
-            background: #f0f4ff;
-            font-family: 'Inter', Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-
-        .logo-container {
-            margin: 30px 0 15px;
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            margin: 20px;
         }
-
-        .logo-container img {
-            width: 280px;
-            height: auto;
-        }
-
-        .brand-name {
-            font-size: 28px;
-            color: #003366;
-            letter-spacing: 0.5px;
-            margin-bottom: 30px;
-            display: block;
+        h1 {
             text-align: center;
-        }
-
-        .panel {
-            background: #ffffff;
-            border: 1px solid #e0e6f3;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-top: 20px;
-            text-align: center;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .panel h1 {
-            font-size: 24px;
-            color: #003366;
-            font-weight: 600;
+            color: #667eea;
             margin-bottom: 20px;
         }
-
-        .set label {
-            display: block;
-            font-size: 14px;
-            margin-bottom: 5px;
-            color: #555;
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-
-        .set input {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .set button {
-            background-color: #6c5ce7;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        input, select, button {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
             font-size: 16px;
-            transition: background-color 0.3s ease;
         }
-
-        .set button:hover {
-            background-color: #574b90;
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
         }
-
-        @media (max-width: 768px) {
-            .panel {
-                width: 90%;
-            }
+        button:hover {
+            background: #5a6fd8;
         }
+        .balance {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f4f4f4;
+        }
+        .income { color: green; }
+        .expense { color: red; }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <div class="logo-container">
-            <img src="https://i.imghippo.com/files/Yk6824Ilg.png" alt="Ajaib Logo" class="logo-ajaib">
-        </div>
-        
-        <div class="panel">
-            <h1>𝐒𝐄𝐓𝐓𝐈𝐍𝐆 𝐖𝐄𝐁 𝐋𝐔𝐇𝐇</h1>
-
-            <div class="set">
-                <form action="./setting.html" method="POST"> <!-- Action kosong karena HTML saja, tanpa PHP -->
-                    <label for="nomor">Nomor Telepon/WhatsApp : </label>
-                    <input type="text" name="nomor" placeholder="Masukkan nomor baru" value="" required>
-                    <button type="submit">Update Nomor</button>
-                </form>
-            </div>
-        </div>
+    <div class="container">
+        <h1>Pencatat Keuangan</h1>
+        <div class="balance">Saldo: Rp <span id="totalBalance">0</span></div>
+        <form id="transactionForm">
+            <select id="type" required>
+                <option value="">Pilih Jenis</option>
+                <option value="income">Pemasukan</option>
+                <option value="expense">Pengeluaran</option>
+            </select>
+            <input type="text" id="description" placeholder="Deskripsi (mis: Gaji, Makanan)" required>
+            <input type="number" id="amount" placeholder="Jumlah (Rp)" required>
+            <button type="submit">Tambah Transaksi</button>
+        </form>
+        <table id="transactionTable">
+            <thead>
+                <tr>
+                    <th>Jenis</th>
+                    <th>Deskripsi</th>
+                    <th>Jumlah</th>
+                    <th>Tanggal</th>
+                </tr>
+            </thead>
+            <tbody id="transactionList"></tbody>
+        </table>
     </div>
 
-    <!-- Bootstrap Icons (diambil dari index web Ajaib) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
-    
-    <!-- Bootstrap JS and dependencies (diambil dari index web Ajaib) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
-        // Script sederhana untuk logging (diadaptasi dari index web Ajaib)
-        document.querySelector('button').addEventListener('click', function() {
-            console.log('Nomor updated (HTML only, no save)');
+        const form = document.getElementById('transactionForm');
+        const table = document.getElementById('transactionList');
+        const balanceDisplay = document.getElementById('totalBalance');
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let totalBalance = 0;
+
+        function updateBalance() {
+            totalBalance = transactions.reduce((sum, t) => {
+                return t.type === 'income' ? sum + t.amount : sum - t.amount;
+            }, 0);
+            balanceDisplay.textContent = totalBalance.toLocaleString('id-ID');
+        }
+
+        function renderTransactions() {
+            table.innerHTML = '';
+            transactions.forEach((t, index) => {
+                const row = table.insertRow();
+                row.innerHTML = `
+                    <td class="${t.type}">${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}</td>
+                    <td>${t.description}</td>
+                    <td>Rp ${t.amount.toLocaleString('id-ID')}</td>
+                    <td>${t.date}</td>
+                `;
+            });
+            updateBalance();
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const type = document.getElementById('type').value;
+            const description = document.getElementById('description').value;
+            const amount = parseInt(document.getElementById('amount').value);
+            const date = new Date().toLocaleDateString('id-ID');
+
+            transactions.push({ type, description, amount, date });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            renderTransactions();
+            form.reset();
         });
+
+        renderTransactions();
     </script>
 </body>
 </html>
