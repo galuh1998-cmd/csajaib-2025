@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logo Love dari Binting Binting</title>
+    <title>Logo Love dari Titik</title>
     <style>
         body {
             display: flex;
@@ -13,39 +13,54 @@
             margin: 0;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
+            overflow: hidden;
         }
-        .logo {
-            font-size: 4rem;
-            font-weight: bold;
-            color: #ff69b4; /* Pink untuk love */
-            text-align: center;
+        .dot {
+            width: 10px;
+            height: 10px;
+            background-color: #000; /* Titik hitam awal */
+            border-radius: 50%;
+            position: absolute;
             opacity: 0;
-            transition: opacity 1s ease-in-out, color 1s ease-in-out;
+            transition: all 2s ease-in-out; /* Transisi untuk membesar dan berubah warna */
         }
-        .show {
+        .dot.show {
             opacity: 1;
+            width: 200px;
+            height: 200px;
+            background-color: #ff69b4; /* Pink saat membesar */
         }
         .love {
+            position: absolute;
+            font-size: 4rem;
+            font-weight: bold;
             color: #ff1493; /* Deep pink untuk love */
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .love.show {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <div id="logo" class="logo">Binting Binting</div>
+    <div id="dot" class="dot"></div>
+    <div id="love" class="love">Love</div>
 
     <script>
-        const logo = document.getElementById('logo');
+        const dot = document.getElementById('dot');
+        const love = document.getElementById('love');
         
-        // Tunggu 2 detik, lalu ubah teks dan tambahkan kelas love
+        // Mulai dengan titik kecil yang muncul
         setTimeout(() => {
-            logo.textContent = 'Love';
-            logo.classList.add('love');
-        }, 2000);
-        
-        // Tambahkan kelas show untuk animasi fade-in
-        setTimeout(() => {
-            logo.classList.add('show');
+            dot.classList.add('show');
         }, 500);
+        
+        // Setelah titik membesar, sembunyikan titik dan tampilkan "Love"
+        setTimeout(() => {
+            dot.style.opacity = '0'; // Sembunyikan titik
+            love.classList.add('show'); // Tampilkan "Love"
+        }, 2500);
     </script>
 </body>
 </html>
