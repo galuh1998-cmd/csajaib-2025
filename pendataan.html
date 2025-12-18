@@ -3,64 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logo Love dari Titik</title>
+    <title>Masa Aktif Website Perminggu Cross-Device</title>
     <style>
         body {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
-            overflow: hidden;
+            text-align: center;
         }
-        .dot {
-            width: 10px;
-            height: 10px;
-            background-color: #000; /* Titik hitam awal */
-            border-radius: 50%;
-            position: absolute;
-            opacity: 0;
-            transition: all 2s ease-in-out; /* Transisi untuk membesar dan berubah warna */
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
         }
-        .dot.show {
-            opacity: 1;
-            width: 200px;
-            height: 200px;
-            background-color: #ff69b4; /* Pink saat membesar */
-        }
-        .love {
-            position: absolute;
-            font-size: 4rem;
+        .countdown {
+            font-size: 2rem;
             font-weight: bold;
-            color: #ff1493; /* Deep pink untuk love */
-            opacity: 0;
-            transition: opacity 1s ease-in-out;
+            color: #ff1493;
+            margin-bottom: 20px;
         }
-        .love.show {
-            opacity: 1;
+        .message {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .expired {
+            color: #ff0000;
+        }
+        button {
+            background-color: #25d366; /* Warna WhatsApp */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        input {
+            padding: 10px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .share-link {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div id="dot" class="dot"></div>
-    <div id="love" class="love">Love</div>
+    <div class="container">
+        <h1>Masa Aktif Website Perminggu</h1>
+        <div class="message">Masukkan ID User untuk sinkronisasi cross-device:</div>
+        <input type="text" id="userId" placeholder="Contoh: user123" />
+        <button onclick="setUserId()">Set ID User</button>
+        <div id="userStatus" class="message"></div>
+        <div id="shareLink" class="share-link"></div>
+        <div class="message">Website aktif selama 7 hari. Waktu tersisa:</div>
+        <div id="countdown" class="countdown">--:--:--:--</div>
+        <div id="status" class="message"></div>
+        <button id="extendBtn" onclick="extendViaWA()">Perpanjang via WhatsApp</button>
+    </div>
 
     <script>
-        const dot = document.getElementById('dot');
-        const love = document.getElementById('love');
+        const countdownEl = document.getElementById('countdown');
+        const statusEl = document.getElementById('status');
+        const extendBtn = document.getElementById('extendBtn');
+        const userIdEl = document.getElementById('userId');
+        const userStatusEl = document.getElementById('userStatus');
+        const shareLinkEl = document.getElementById('shareLink');
         
-        // Mulai dengan titik kecil yang muncul
-        setTimeout(() => {
-            dot.classList.add('show');
-        }, 500);
+        // Durasi masa aktif: 7 hari (dalam milidetik)
+        const duration = 7 * 24 * 60 * 60 * 1000; // 7 hari
         
-        // Setelah titik membesar, sembunyikan titik dan tampilkan "Love"
-        setTimeout(() => {
-            dot.style.opacity = '0'; // Sembunyikan titik
-            love.classList.add('show'); // Tampilkan "Love"
-        }, 2500);
+        let userId = null;
+        let startTime = null;
+        
+        // Minta izin notifikasi saat load
+        if ('Notification' in window) {
+            Notification.requestPermission();
+        }
+        
+        function showNotification(title, body) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, { body: body, icon: 'https://via.placeholder.com/64' });
+            } else {
+                alert(`${title}: ${body}`);
+            }
+        }
+        
+        // Cek URL parameter untuk userId
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlUserId = urlParams.get('userId');
+        if (urlUserId) {
+            userId = urlUserId;
+            userIdEl.value = userId;
+            localStorage.setItem('userId', userId);
+            // Load startTime berdasarkan userId
+            startTime = localStorage.getItem(`startTime_${userId}`);
+            if (!startTime) {
+                startTime = Date.now();
+                localStorage.setItem(`startTime_${userId}`, startTime);
+            }
+            startTime = parseInt(startTime);
+            userStatusEl.textContent = `ID User dari URL: ${userId} - Masa aktif dimulai.`;
+            updateShareLink();
+            updateCountdown();
+        } else {
+            // Load dari localStorage jika ada
+            userId = localStorage.getItem('userId');
+            if (userId) {
+                userIdEl.value = userId;
+                startTime = localStorage.getItem(`startTime_${userId}`);
+                if (startTime) {
+                    startTime = parseInt(startTime);
+                    userStatusEl.textContent = `ID User: ${userId} - Masa aktif berjalan.`;
+                    updateShareLink();
+                } else {
+                    userStatusEl.textContent = 'ID User ditemukan, tapi masa aktif belum dimulai. Klik Set ID User.';
+                }
+            } else {
+                userStatusEl.textContent = 'Masukkan ID User untuk mulai.';
+            }
+        }
+        
+        function setUserId() {
+            const newId = userIdEl.value.trim();
+            if (newId) {
+                userId = newId;
+                localStorage.setItem('userId', userId);
+                startTime = localStorage.getItem(`startTime_${userId}`);
+                if (!startTime) {
+                    startTime = Date.now();
+                    localStorage.setItem(`startTime_${userId}`, startTime);
+                }
+                startTime = parseInt(startTime);
+                userStatusEl.textContent = `ID User: ${userId} - Masa aktif dimulai.`;
+                updateShareLink();
+                updateCountdown();
+            } else {
+                alert('Masukkan ID User yang valid!');
+            }
+        }
+        
+        function updateShareLink() {
+            if (userId) {
+                const currentUrl = window.location.href.split('?')[0];
+                const shareUrl = `${currentUrl}?userId=${userId}`;
+                shareLinkEl.innerHTML = `Share link ini ke device lain: <a href="${shareUrl}" target="_blank">${shareUrl}</a>`;
+            }
+        }
+        
+        // Variabel untuk tracking notifikasi
+        let notifiedAlmostExpired = false;
+        let notifiedExpired = false;
+        
+        function updateCountdown() {
+            if (!startTime) return;
+            
+            const now = Date.now();
+            const elapsed = now - startTime;
+            const remaining = duration - elapsed;
+            
+            if (remaining <= 0) {
+                countdownEl.textContent = '00:00:00:00';
+                statusEl.textContent = 'Masa aktif habis! Hubungi untuk perpanjang.';
+                statusEl.classList.add('expired');
+                extendBtn.disabled = true;
+                
+                if (!notifiedExpired) {
+                    showNotification('Masa Aktif Habis', 'Masa aktif website telah habis! Perpanjang sekarang.');
+                    notifiedExpired = true;
+                }
+                return;
+            }
+            
+            // Notifikasi 1 jam sebelum habis
+            if (remaining <= 60 * 60 * 1000 && !notifiedAlmostExpired) {
+                showNotification('Masa Aktif Hampir Habis', 'Masa aktif hampir habis! Perpanjang sekarang.');
+                notifiedAlmostExpired = true;
+            }
+            
+            const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+            
+            countdownEl.textContent = `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function extendViaWA() {
+            const phoneNumber = '628xxxxxxxxx'; // Ganti dengan nomor WhatsApp Anda
+            const message = encodeURIComponent('Saya ingin perpanjang masa aktif website.');
+            const url = `https://wa.me/${phoneNumber}?text=${message}`;
+            window.open(url, '_blank');
+        }
+        
+        // Update countdown setiap detik
+        setInterval(updateCountdown, 1000);
+        updateCountdown(); // Jalankan sekali saat load
     </script>
 </body>
-</html>
+        </html>
